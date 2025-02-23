@@ -2,7 +2,7 @@
 	"name": "log-monitor",
 	"version": "1.0.0",
 	"scripts": {
-		"start": "tsc && node dist/index.js",
+		"start": "tsc && node build/index.js",
 		"build:report": "npm run start logs.log 2> report.txt",
 		"test": "jest --watch"
 	},

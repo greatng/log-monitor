@@ -12,3 +12,6 @@ How to run:
 Optional: Build a report
 
 - run `npm run build:report` to generate report in `report.txt` file
+
+Note:
+- There are few test cases that need to be added, but I can't finish it in time.
