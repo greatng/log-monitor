@@ -4,22 +4,26 @@ const APP_NAME = 'LOG Monitor';
 
 type ProcessInfo = {
     pid: string;
-    start: string;
+    start?: string;
     end?: string;
     duration: number; // epoch time
     description: string;
 };
 
-function createDate(time: string): Date {
-    console.log(time);
+enum LogError {
+    WARN = 'WARN',
+    ERROR = 'ERROR',
+}
+
+function createDateFromTime(time: string): Date {
     const [hh, mm, ss] = time.split(':').map((t) => parseInt(t));
 
     return new Date(0, 0, 0, hh, mm, ss);
 }
 
 function calculateProcessingTime(start: string, end: string): number {
-    const startDate = createDate(start);
-    const endDate = createDate(end);
+    const startDate = createDateFromTime(start);
+    const endDate = createDateFromTime(end);
 
     return endDate.getTime() - startDate.getTime();
 }
@@ -28,8 +32,16 @@ function isProcessTypeStart(processType: string): boolean {
     return processType.toUpperCase().trim() === 'START';
 }
 
-function triageLogDuration(duration: number): void {
-    // should triage if duraction exceed certain number
+function triageLogDuration(duration: number): LogError | null {
+    const MS_TO_MINUTE = 60 * 1000;
+
+    if (duration > 10 * MS_TO_MINUTE) {
+        return LogError.ERROR;
+    } else if (duration > 5 * MS_TO_MINUTE) {
+        return LogError.WARN;
+    }
+
+    return null;
 }
 
 function processLogs(logs: string[][]): void {
@@ -68,17 +80,40 @@ function processLogs(logs: string[][]): void {
                 processInfo[pid].end
             );
         }
-    }
 
-    // console.log(processInfo);
+        // check if log should show any warning/error
+        const error = triageLogDuration(processInfo[pid].duration);
+
+        if (error) {
+            switch (error) {
+                case LogError.WARN:
+                    warnLog(
+                        `PID: ${pid} - ${processInfo[pid].description} - Process took longer than 5 minutes`
+                    );
+                    break;
+                case LogError.ERROR:
+                    errorLog(
+                        `PID: ${pid} - ${processInfo[pid].description} - Process took longer than 10 minutes`
+                    );
+                    break;
+            }
+        }
+    }
 }
 
 function warnLog(message: string) {
-    console.warn(`[${APP_NAME}][WARN] ${message}`);
+    // add color in terminal
+    console.warn('\x1b[33m', `[${APP_NAME}][WARN] ${message}`, '\x1b[0m');
 }
 
 function errorLog(message: string, error?: Error) {
-    console.error(`[${APP_NAME}][ERROR] ${message}`, error);
+    // add color in terminal
+    console.error(
+        '\x1b[31m',
+        `[${APP_NAME}][ERROR] ${message}`,
+        error ?? '',
+        '\x1b[0m'
+    );
 }
 
 function splitCSVcolumns(lines: string[]): string[][] {
@@ -121,6 +156,7 @@ function main(argv: string[]) {
 
     const fileName = argv[0];
 
+    // incase some user use relative path
     fs.realpath(fileName, async (error, path) => {
         if (error) {
             errorLog('File not found', error);

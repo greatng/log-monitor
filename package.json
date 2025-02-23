@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"scripts": {
 		"start": "tsc && node dist/index.js",
+		"build:report": "npm run start logs.log 2> report.txt",
 		"test": "jest"
 	},
 	"author": "",
