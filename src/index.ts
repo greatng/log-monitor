@@ -2,7 +2,7 @@ import * as fs from 'fs';
 
 const APP_NAME = 'LOG Monitor';
 
-type pidInfo = {
+type ProcessInfo = {
     pid: string;
     start: string;
     end?: string;
@@ -10,54 +10,53 @@ type pidInfo = {
     description: string;
 };
 
-enum ProcessType {
-    Start,
-    Stop,
-}
-
 function calculateProcessingTime(start: string, end: string): number {
     return new Date(end).getTime() - new Date(start).getTime();
 }
 
+function isProcessTypeStart(processType: string): boolean {
+    return processType.toUpperCase().trim() === 'START';
+}
+
 function processLogs(logs: string[][]): void {
-    const pidMap: any = {};
+    const processInfo = {} as ProcessInfo;
 
     for (let i = 0; i < logs.length; i++) {
         const line = logs[i];
 
         // skip this line if log is not valid format
-        if (line.length !== 3) {
+        if (line.length !== 4) {
             continue;
         }
 
         const pid = line[3];
 
-        const processType =
-            line[2].toUpperCase() === 'START'
-                ? ProcessType.Start
-                : ProcessType.Stop;
-
-        if (processType === ProcessType.Start) {
+        if (isProcessTypeStart(line[2])) {
             const start = parseInt(line[0]);
-            const description = line[4];
+            const description = line[1];
 
-            pidMap[pid] = {
+            processInfo[pid] = {
                 pid,
                 start,
                 description,
             };
         } else {
-            pidMap[pid].end = parseInt(line[0]);
+            processInfo[pid] = {
+                ...processInfo[pid],
+                end: parseInt(line[0]),
+            };
         }
 
         // In case logs is just the portion and there is no START or END time
-        if (pidMap[pid].start && pidMap[pid].end) {
-            pidMap[pid].duration = calculateProcessingTime(
-                pidMap[pid].start,
-                pidMap[pid].end
+        if (processInfo[pid].start && processInfo[pid].end) {
+            processInfo[pid].duration = calculateProcessingTime(
+                processInfo[pid].start,
+                processInfo[pid].end
             );
         }
     }
+
+    console.log(processInfo);
 }
 
 function warnLog(message: string) {
