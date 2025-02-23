@@ -1,11 +1,22 @@
 {
+    "extends": "@tsconfig/node20/tsconfig.json",
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "display": "Node 20",
+    "_version": "20.11.0",
+
     "compilerOptions": {
-        "module": "commonjs",
+        "lib": ["es2023"],
+        "module": "node16",
+        "target": "es2022",
+
+        "strict": true,
         "esModuleInterop": true,
-        "target": "es6",
-        "moduleResolution": "node",
-        "sourceMap": true,
-        "outDir": "dist"
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "node16",
+        "outDir": "./build",
+        "rootDir": "./src"
     },
-    "lib": ["es2015"]
+    "include": ["src/**/*.ts"]
 }
+

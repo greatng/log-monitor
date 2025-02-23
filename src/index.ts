@@ -6,7 +6,7 @@ type ProcessInfo = {
     pid: string;
     start?: string;
     end?: string;
-    duration: number; // epoch time
+    duration?: number; // epoch time
     description: string;
 };
 
@@ -44,8 +44,8 @@ function triageLogDuration(duration: number): LogError | null {
     return null;
 }
 
-function processLogs(logs: string[][]): void {
-    const processInfo = {} as ProcessInfo;
+export function processLogs(logs: string[][]): void {
+    const processInfo: Record<string, ProcessInfo> = {};
 
     for (let i = 0; i < logs.length; i++) {
         const line = logs[i];
@@ -55,7 +55,7 @@ function processLogs(logs: string[][]): void {
             continue;
         }
 
-        const pid = line[3];
+        const pid = line[3] as string;
 
         if (isProcessTypeStart(line[2])) {
             const start = line[0];
@@ -82,7 +82,7 @@ function processLogs(logs: string[][]): void {
         }
 
         // check if log should show any warning/error
-        const error = triageLogDuration(processInfo[pid].duration);
+        const error = triageLogDuration(processInfo[pid].duration ?? 0);
 
         if (error) {
             switch (error) {
@@ -169,5 +169,8 @@ function main(argv: string[]) {
     });
 }
 
-main(process.argv.slice(2));
+// skip main function if run on test script
+if (__filename === process.argv[1]) {
+    main(process.argv.slice(2));
+}
 

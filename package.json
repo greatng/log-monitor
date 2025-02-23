@@ -4,14 +4,17 @@
 	"scripts": {
 		"start": "tsc && node dist/index.js",
 		"build:report": "npm run start logs.log 2> report.txt",
-		"test": "jest"
+		"test": "jest --watch"
 	},
 	"author": "",
 	"license": "ISC",
 	"description": "",
 	"devDependencies": {
+		"@jest/globals": "^29.7.0",
+		"@tsconfig/node20": "^20.1.4",
 		"@types/jest": "^29.5.14",
 		"jest": "^29.7.0",
+		"ts-jest": "^29.2.6",
 		"typescript": "^5.7.3"
 	}
 }
