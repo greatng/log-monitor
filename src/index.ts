@@ -10,12 +10,26 @@ type ProcessInfo = {
     description: string;
 };
 
+function createDate(time: string): Date {
+    console.log(time);
+    const [hh, mm, ss] = time.split(':').map((t) => parseInt(t));
+
+    return new Date(0, 0, 0, hh, mm, ss);
+}
+
 function calculateProcessingTime(start: string, end: string): number {
-    return new Date(end).getTime() - new Date(start).getTime();
+    const startDate = createDate(start);
+    const endDate = createDate(end);
+
+    return endDate.getTime() - startDate.getTime();
 }
 
 function isProcessTypeStart(processType: string): boolean {
     return processType.toUpperCase().trim() === 'START';
+}
+
+function triageLogDuration(duration: number): void {
+    // should triage if duraction exceed certain number
 }
 
 function processLogs(logs: string[][]): void {
@@ -32,7 +46,7 @@ function processLogs(logs: string[][]): void {
         const pid = line[3];
 
         if (isProcessTypeStart(line[2])) {
-            const start = parseInt(line[0]);
+            const start = line[0];
             const description = line[1];
 
             processInfo[pid] = {
@@ -43,7 +57,7 @@ function processLogs(logs: string[][]): void {
         } else {
             processInfo[pid] = {
                 ...processInfo[pid],
-                end: parseInt(line[0]),
+                end: line[0],
             };
         }
 
@@ -56,7 +70,7 @@ function processLogs(logs: string[][]): void {
         }
     }
 
-    console.log(processInfo);
+    // console.log(processInfo);
 }
 
 function warnLog(message: string) {
